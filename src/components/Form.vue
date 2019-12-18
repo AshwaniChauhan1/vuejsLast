@@ -45,14 +45,31 @@
     </b-modal>
     <div class="p-5">
       <h1 class="py-3">Filled Details</h1>
-      <b-table hover :items="items" :fields="fields">
-        <template v-slot:cell(edit)="row">
-          <a @click="edit(row)">Edit</a>
-        </template>
-        <template v-slot:cell(delete)="row">
-          <a @click="del(row)">Delete</a>
-        </template>
-      </b-table>
+      <table class="table table-bordered">
+        <thead class="bg-light">
+          <tr>
+            <th>{{ items[0] | capitalize }}</th>
+            <th>{{ items[1] | capitalize }}</th>
+            <th @click="sortByDob(rows)">{{ items[2] | capitalize }} 
+              <span class="arrow" :class="ascending ? 'dsc'  : 'asc'"></span></th>
+            <th>{{ items[3] | capitalize }}</th>
+            <th>{{ items[4] | capitalize }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(row,index) in rows" :key="index">
+            <td>{{row.email}}</td>
+            <td>{{row.name}}</td>
+            <td>{{row.dob}}</td>
+            <td>
+              <a @click="edit(row,index)">{{row.edit}}</a>
+            </td>
+            <td>
+              <a @click="del(row,index)">{{row.delete}}</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -63,21 +80,16 @@ export default {
   data() {
     return {
       error: "",
-      fields: [
-        "email",
-        "name",
-        { key: "dob", sortable: true },
-        "edit",
-        "delete"
-      ],
-      items: [],
+      items: ["email", "name", "dob", "edit", "delete"],
+      rows: [],
       form: { email: "", name: "", dob: "" },
       val: {},
       password: "",
       cpassword: "",
       status: "not_accepted",
       editIndex: false,
-      indexval: ""
+      indexval: "",
+      ascending: true
     };
   },
   methods: {
@@ -101,9 +113,11 @@ export default {
           this.val = {
             email: this.form.email,
             name: this.form.name,
-            dob: this.form.dob
+            dob: this.form.dob,
+            edit: "Edit",
+            delete: "Delete"
           };
-          this.items.splice(this.indexval, 1, this.val);
+          this.rows.splice(this.indexval, 1, this.val);
           this.editIndex = false;
           this.form.email = "";
           this.form.name = "";
@@ -117,9 +131,11 @@ export default {
           this.val = {
             email: this.form.email,
             name: this.form.name,
-            dob: this.form.dob
+            dob: this.form.dob,
+            edit: "Edit",
+            delete: "Delete"
           };
-          this.items.push(this.val);
+          this.rows.push(this.val);
           this.form.email = "";
           this.form.name = "";
           this.form.dob = "";
@@ -131,15 +147,15 @@ export default {
         }
       }
     },
-    del(item) {
-      this.$delete(this.items, item.index);
+    del(row, index) {
+      this.$delete(this.rows, index);
     },
-    edit(item) {
-      this.form.email = item.item.email;
-      this.form.name = item.item.name;
-      this.form.dob = item.item.dob;
+    edit(item, index) {
+      this.form.email = item.email;
+      this.form.name = item.name;
+      this.form.dob = item.dob;
       this.editIndex = true;
-      this.indexval = item.index;
+      this.indexval = index;
       this.$refs["my-modal"].show();
     },
     close() {
@@ -149,11 +165,30 @@ export default {
       this.cpassword = "";
       this.status = "not_accepted";
       this.error = "";
+      this.editIndex = false;
     },
     validEmail(email) {
       //eslint-disable-next-line
       var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return re.test(email);
+    },
+    sortByDob(rows) {
+      if (this.ascending === true) {
+        rows.sort(function(a, b) {
+          return new Date(a.dob) - new Date(b.dob);
+        });
+        this.ascending = false;
+      } else {
+        rows.sort(function(a, b) {
+          return new Date(b.dob) - new Date(a.dob);
+        });
+        this.ascending = true;
+      }
+    }
+  },
+  filters: {
+    capitalize: function(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
     }
   }
 };
@@ -165,5 +200,26 @@ a {
 }
 #error {
   color: red;
+}
+.arrow {
+  display: inline-block;
+  vertical-align: middle;
+  width: 0;
+  height: 0;
+  margin-left: 5px;
+  opacity: 0.66;
+
+}
+
+.arrow.asc {
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 4px solid black;
+}
+
+.arrow.dsc {
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid black;
 }
 </style>
