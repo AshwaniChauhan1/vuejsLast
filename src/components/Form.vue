@@ -3,7 +3,7 @@
     <div class="text-left pl-5 pt-5">
       <b-button v-b-modal.modal-1>Add Details</b-button>
     </div>
-    <b-modal id="modal-1" ref="my-modal" hide-footer>
+    <b-modal id="modal-1" ref="my-modal" hide-footer @hide="clear">
       <template v-slot:modal-header>
         <h4>Fill Form</h4>
       </template>
@@ -43,15 +43,17 @@
         </b-form>
       </template>
     </b-modal>
-    <div class="p-5">
-      <h1 class="py-3">Filled Details</h1>
+    <div class="px-5">
+      <h1 class="py-2">Filled Details</h1>
       <table class="table table-bordered">
         <thead class="bg-light">
           <tr>
             <th>{{ items[0] | capitalize }}</th>
             <th>{{ items[1] | capitalize }}</th>
-            <th @click="sortByDob(rows)">{{ items[2] | capitalize }} 
-              <span class="arrow" :class="ascending ? 'dsc'  : 'asc'"></span></th>
+            <th @click="sortByDob(rows)">
+              {{ items[2] | capitalize }}
+              <span class="arrow" :class="ascending ? 'dsc'  : 'asc'"></span>
+            </th>
             <th>{{ items[3] | capitalize }}</th>
             <th>{{ items[4] | capitalize }}</th>
           </tr>
@@ -119,14 +121,6 @@ export default {
           };
           this.rows.splice(this.indexval, 1, this.val);
           this.editIndex = false;
-          this.form.email = "";
-          this.form.name = "";
-          this.form.dob = "";
-          this.password = "";
-          this.cpassword = "";
-          this.status = "not_accepted";
-          this.error = "";
-          this.$refs["my-modal"].hide();
         } else {
           this.val = {
             email: this.form.email,
@@ -136,15 +130,8 @@ export default {
             delete: "Delete"
           };
           this.rows.push(this.val);
-          this.form.email = "";
-          this.form.name = "";
-          this.form.dob = "";
-          this.password = "";
-          this.cpassword = "";
-          this.status = "not_accepted";
-          this.error = "";
-          this.$refs["my-modal"].hide();
         }
+        this.$refs["my-modal"].hide();
       }
     },
     del(row, index) {
@@ -160,6 +147,8 @@ export default {
     },
     close() {
       this.$refs["my-modal"].hide();
+    },
+    clear() {
       this.form = { email: "", name: "", dob: "" };
       this.password = "";
       this.cpassword = "";
@@ -208,7 +197,6 @@ a {
   height: 0;
   margin-left: 5px;
   opacity: 0.66;
-
 }
 
 .arrow.asc {
