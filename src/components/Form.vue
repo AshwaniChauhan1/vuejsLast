@@ -12,7 +12,6 @@
       </template>
       <template v-slot>
         <b-form v-on:submit.prevent>
-          <p id="error">{{error}}</p>
           <b-form-group class="text-left" label="Email Address:">
             <b-form-input type="email" placeholder="Enter email" v-model="form.email" required></b-form-input>
           </b-form-group>
@@ -39,6 +38,7 @@
             unchecked-value="not_accepted"
             v-model="status"
           >I accept the terms and conditions</b-form-checkbox>
+          <p id="error">{{error}}</p>
           <div class="justify-content-between d-flex py-3">
             <b-button variant="primary" @click="submit" type="submit">Submit</b-button>
             <b-button @click="close">Close</b-button>
@@ -54,7 +54,7 @@
             <th v-for="(item,index) in items" :key="index" @click="selectDob(item)">
               {{ item | capitalize }}
               <span
-                :class="[(item === 'dob') ? 'arrow' : '',ascending ? 'dsc'  : 'asc']"
+                :class="[(item === 'dob') ? 'arrow' : '',ascending ? 'asc'  : 'dsc']"
               ></span>
             </th>
           </tr>
@@ -98,19 +98,19 @@ export default {
   methods: {
     submit() {
       if (this.form.email === "") {
-        this.error = "Email required.";
+        this.error = "*Email required.";
       } else if (!this.validEmail(this.form.email)) {
-        this.error = "Invalid Email.";
+        this.error = "*Invalid Email.";
       } else if (this.form.name === "") {
-        this.error = "Name required.";
+        this.error = "*Name required.";
       } else if (this.form.dob == "") {
-        this.error = "DOB required.";
+        this.error = "*DOB required.";
       } else if (this.password == "" || this.cpassword == "") {
-        this.error = "Password required.";
+        this.error = "*Password required.";
       } else if (this.password != this.cpassword) {
-        this.error = "Password not match";
+        this.error = "*Password not match";
       } else if (this.status != "accepted") {
-        this.error = "please accepts terms and conditions";
+        this.error = "*please accepts terms and conditions";
       } else {
         if (this.editIndex == true) {
           this.val = {
@@ -168,16 +168,21 @@ export default {
       }
     },
     sortByDob(rows) {
-      if (this.ascending === true) {
+      if(rows.length <2){
+        this.ascending ===true;
+      }
+      else{
+        if (this.ascending === true) {
         rows.sort(function(a, b) {
-          return new Date(a.dob) - new Date(b.dob);
+           return new Date(b.dob) - new Date(a.dob);
         });
         this.ascending = false;
       } else {
         rows.sort(function(a, b) {
-          return new Date(b.dob) - new Date(a.dob);
+          return new Date(a.dob) - new Date(b.dob);
         });
         this.ascending = true;
+      }
       }
     }
   },
