@@ -1,6 +1,9 @@
 <template>
   <div>
-    <div class="text-left pl-5 pt-5">
+    <div class="jumbotron">
+      <h1>FORM - TABLE - ASSIGNMENT</h1>
+    </div>
+    <div class="text-left pl-5">
       <b-button v-b-modal.modal-1>Add Details</b-button>
     </div>
     <b-modal id="modal-1" ref="my-modal" hide-footer @hide="clear">
@@ -44,18 +47,16 @@
       </template>
     </b-modal>
     <div class="px-5">
-      <h1 class="py-2">Filled Details</h1>
+      <h2 class="py-2">Filled Details</h2>
       <table class="table table-bordered">
         <thead class="bg-light">
           <tr>
-            <th>{{ items[0] | capitalize }}</th>
-            <th>{{ items[1] | capitalize }}</th>
-            <th @click="sortByDob(rows)">
-              {{ items[2] | capitalize }}
-              <span class="arrow" :class="ascending ? 'dsc'  : 'asc'"></span>
+            <th v-for="(item,index) in items" :key="index" @click="selectDob(item)">
+              {{ item | capitalize }}
+              <span
+                :class="[(item === 'dob') ? 'arrow' : '',ascending ? 'dsc'  : 'asc']"
+              ></span>
             </th>
-            <th>{{ items[3] | capitalize }}</th>
-            <th>{{ items[4] | capitalize }}</th>
           </tr>
         </thead>
         <tbody>
@@ -160,6 +161,11 @@ export default {
       //eslint-disable-next-line
       var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return re.test(email);
+    },
+    selectDob(item) {
+      if (item === "dob") {
+        this.sortByDob(this.rows);
+      }
     },
     sortByDob(rows) {
       if (this.ascending === true) {
