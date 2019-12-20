@@ -60,7 +60,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(row,index) in rows" :key="index">
+          <tr v-for="(row,index) in get_rows()" :key="index">
             <td>{{row.email}}</td>
             <td>{{row.name}}</td>
             <td>{{row.dob}}</td>
@@ -73,6 +73,15 @@
           </tr>
         </tbody>
       </table>
+      <div class="p-3 d-flex justify-content-end">
+        <div
+          class="number"
+          v-for="(i,index) in num_pages()"
+          :key="index"
+          :class="[i == currentPage ? 'active' : '']"
+          @click="change_page(i)"
+        >{{i}}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -92,7 +101,9 @@ export default {
       status: "not_accepted",
       editIndex: false,
       indexval: "",
-      ascending: true
+      ascending: true,
+      currentPage: 1,
+      elementsPerPage: 5
     };
   },
   methods: {
@@ -120,7 +131,11 @@ export default {
             edit: "Edit",
             delete: "Delete"
           };
-          this.rows.splice(this.indexval, 1, this.val);
+          this.rows.splice(
+            this.indexval + (this.currentPage - 1) * this.elementsPerPage,
+            1,
+            this.val
+          );
           this.editIndex = false;
         } else {
           this.val = {
@@ -136,7 +151,21 @@ export default {
       }
     },
     del(row, index) {
-      this.$delete(this.rows, index);
+      if (
+        this.rows.length ==
+        (this.currentPage - 1) * this.elementsPerPage + 1
+      ) {
+        this.$delete(this.rows, (this.currentPage - 1) * this.elementsPerPage);
+        this.currentPage = this.currentPage - 1;
+        if (this.currentPage == 0) {
+          this.currentPage = 1;
+        }
+      } else {
+        this.$delete(
+          this.rows,
+          index + (this.currentPage - 1) * this.elementsPerPage
+        );
+      }
     },
     edit(item, index) {
       this.form.email = item.email;
@@ -168,22 +197,32 @@ export default {
       }
     },
     sortByDob(rows) {
-      if(rows.length <2){
-        this.ascending ===true;
-      }
-      else{
-        if (this.ascending === true) {
-        rows.sort(function(a, b) {
-           return new Date(b.dob) - new Date(a.dob);
-        });
-        this.ascending = false;
+      if (rows.length < 2) {
+        this.ascending === true;
       } else {
-        rows.sort(function(a, b) {
-          return new Date(a.dob) - new Date(b.dob);
-        });
-        this.ascending = true;
+        if (this.ascending === true) {
+          rows.sort(function(a, b) {
+            return new Date(b.dob) - new Date(a.dob);
+          });
+          this.ascending = false;
+        } else {
+          rows.sort(function(a, b) {
+            return new Date(a.dob) - new Date(b.dob);
+          });
+          this.ascending = true;
+        }
       }
-      }
+    },
+    num_pages: function() {
+      return Math.ceil(this.rows.length / this.elementsPerPage);
+    },
+    get_rows: function() {
+      var start = (this.currentPage - 1) * this.elementsPerPage;
+      var end = start + this.elementsPerPage;
+      return this.rows.slice(start, end);
+    },
+    change_page: function(i) {
+      this.currentPage = i;
     }
   },
   filters: {
@@ -200,6 +239,10 @@ a {
 }
 #error {
   color: red;
+}
+th,
+tr {
+  width: 200px;
 }
 .arrow {
   display: inline-block;
@@ -220,5 +263,19 @@ a {
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
   border-top: 4px solid black;
+}
+
+.number {
+  display: inline-block;
+  padding: 4px 10px;
+  color: #fff;
+  border-radius: 4px;
+  background: #717699;
+  margin: 0px 5px;
+  cursor: pointer;
+}
+.number:hover,
+.number.active {
+  background: rgb(42, 159, 189);
 }
 </style>
